@@ -4,11 +4,14 @@ from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .core.config import settings, get_settings
+from .core.config import get_settings
 from .core.db import init_db
 from .core.security import get_current_user_optional
 from .middlewares.rate_limit import RateLimitMiddleware
 from .routers import auth, users, products, categories, locations, inventory, costs, reporting, webhooks
+
+# Load settings from env (.env) using pydantic-settings
+settings = get_settings()
 
 # Configure root logger
 logging.basicConfig(

@@ -48,6 +48,14 @@ pip install -r requirements.txt
 uvicorn src.api.main:app --host 0.0.0.0 --port 3001 --reload
 ```
 
+Notes on database drivers:
+- By default, this project uses SQLAlchemy with the PyMySQL driver (pure Python) for MySQL connections to ensure cross-platform, dependency-free installs in CI and local dev.
+- If MYSQL_* env vars are not set, the app falls back to SQLite automatically (no external DB required).
+- If you prefer the mysqlclient (C-based) driver for performance, you can replace PyMySQL with mysqlclient in requirements and set the driver URL to `mysql+mysqlclient://...`, but you must install system dependencies before pip install, e.g.:
+  - Debian/Ubuntu: `apt-get update && apt-get install -y default-libmysqlclient-dev build-essential`
+  - Alpine: `apk add --no-cache mariadb-connector-c-dev gcc musl-dev`
+  - RHEL/CentOS/Fedora: `dnf install -y mysql-devel gcc python3-devel`
+
 Open docs: http://localhost:3001/docs
 
 ## Initial admin

@@ -42,8 +42,9 @@ class Settings(BaseSettings):
         If MYSQL_* settings are provided, use MySQL; otherwise fall back to SQLite.
         """
         if all([self.MYSQL_HOST, self.MYSQL_USER, self.MYSQL_PASSWORD, self.MYSQL_DB]):
+            # Use PyMySQL (pure Python) to avoid native build issues from mysqlclient
             return (
-                f"mysql+mysqlclient://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
+                f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
                 f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DB}"
             )
         return self.SQLITE_URL

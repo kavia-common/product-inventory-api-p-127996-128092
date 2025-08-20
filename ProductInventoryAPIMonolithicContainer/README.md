@@ -6,7 +6,7 @@ A monolithic FastAPI backend that provides:
 - Reporting & analytics endpoints
 - Webhook configuration and trigger
 - Rate limiting, CORS, security headers, validation, logging
-- MySQL persistence via SQLAlchemy
+- MySQL persistence via SQLAlchemy (with SQLite fallback for local dev)
 - Auto-generated docs at /docs and /redoc
 
 ## Environment variables (.env)
@@ -18,12 +18,14 @@ APP_NAME=Product Inventory API
 LOG_LEVEL=INFO
 CORS_ALLOW_ORIGINS=["*"]
 
-# MySQL connection
-MYSQL_HOST=localhost
+# MySQL connection (optional for local dev; if not provided, SQLite is used)
+MYSQL_HOST=
 MYSQL_PORT=3306
-MYSQL_USER=your_user
-MYSQL_PASSWORD=your_password
-MYSQL_DB=inventory
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_DB=
+# Optional SQLite fallback (default sqlite:///./inventory.db)
+SQLITE_URL=sqlite:///./inventory.db
 
 # Auth
 JWT_SECRET_KEY=replace-with-strong-secret
@@ -56,6 +58,6 @@ POST /auth/seed-admin?username=admin&password=ChangeMe123!&email=admin@example.c
 Then login at /auth/login via OAuth2 Password flow. Use returned Bearer token for protected endpoints.
 
 ## Notes
-- This container uses SQLAlchemy with mysqlclient. Ensure MySQL is reachable and credentials valid.
+- This container uses SQLAlchemy. In production, configure MySQL env vars; for local development, the app falls back to SQLite (no external DB required).
 - Rate limiting is in-memory per-process; for distributed deployments, use a shared store (e.g., Redis).
 - Webhook trigger signs payloads with HMAC-SHA256 via `X-Signature`.

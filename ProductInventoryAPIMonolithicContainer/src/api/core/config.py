@@ -14,12 +14,13 @@ class Settings(BaseSettings):
     # Server
     CORS_ALLOW_ORIGINS: List[str] = Field(default_factory=lambda: ["*"])
 
-    # Database (MySQL)
-    MYSQL_HOST: str = Field(default="localhost", description="MySQL host")
+    # Database (MySQL) - fallback to SQLite for local/dev if MYSQL_* not available
+    MYSQL_HOST: str = Field(default="", description="MySQL host")
     MYSQL_PORT: int = Field(default=3306, description="MySQL port")
-    MYSQL_USER: str = Field(default="user", description="MySQL user")
-    MYSQL_PASSWORD: str = Field(default="password", description="MySQL password")
-    MYSQL_DB: str = Field(default="inventory", description="MySQL database")
+    MYSQL_USER: str = Field(default="", description="MySQL user")
+    MYSQL_PASSWORD: str = Field(default="", description="MySQL password")
+    MYSQL_DB: str = Field(default="", description="MySQL database")
+    SQLITE_URL: str = Field(default="sqlite:///./inventory.db", description="SQLite fallback URL for local dev/testing")
     SQL_ECHO: bool = Field(default=False, description="Echo SQL statements")
 
     # Auth
@@ -36,11 +37,16 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     def database_url(self) -> str:
-        """Build the SQLAlchemy database URL for MySQL."""
-        return (
-            f"mysql+mysqlclient://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
-            f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DB}"
-        )
+        """Build the SQLAlchemy database URL.
+
+        If MYSQL_* settings are provided, use MySQL; otherwise fall back to SQLite.
+        """
+        if all([self.MYSQL_HOST, self.MYSQL_USER, self.MYSQL_PASSWORD, self.MYSQL_DB]):
+            return (
+                f"mysql+mysqlclient://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
+                f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DB}"
+            )
+        return self.SQLITE_URL
 
     def masked_dict(self) -> dict:
         """Return setting values with sensitive data masked."""
